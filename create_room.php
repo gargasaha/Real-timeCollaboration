@@ -1,4 +1,5 @@
 <?php
+    
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         session_start();
         $room_name = $_POST['room_name'];
@@ -31,7 +32,7 @@
                 $result = mysqli_query($mysqli, $sql);
                 if (!$result) {
                     die("Query failed: " . mysqli_error($mysqli));
-                }
+                }   
                 $row = mysqli_fetch_assoc($result);
                 mysqli_free_result($result);
                 $_SESSION['roomId'] = $row['id'];
@@ -40,6 +41,13 @@
                 if (!mysqli_query($mysqli, $sql)) {
                     echo "<script>alert('Error adding member to room: " . mysqli_error($mysqli) . "');</script>";
                 }
+
+                $sql="insert into code_bases (codes,room_id) values ('', {$_SESSION['roomId']})";
+                if (!mysqli_query($mysqli, $sql)) {
+                    echo "<script>alert('Error creating code base: " . mysqli_error($mysqli) . "');</script>";
+                }
+
+
                 mysqli_close($mysqli);
                 header("Location: dashboard.php");
                 exit();

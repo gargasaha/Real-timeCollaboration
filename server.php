@@ -41,7 +41,7 @@ class CollabServer implements MessageComponentInterface {
 
         // Step 3: Unicast (target_user_id is set)
         if (isset($data['target_user_id'])) {
-            foreach ($this->users as $target) {
+            foreach ($this->users as $resId => $target) {
                 if (
                     $target['user_id'] == $data['target_user_id'] &&
                     $target['room_id'] == $sender['room_id']
@@ -94,7 +94,7 @@ $server = \Ratchet\Server\IoServer::factory(
             new CollabServer()
         )
     ),
-    9000
+    8080
 );
 
 echo "✅ WebSocket Server running on port 8080...\n";

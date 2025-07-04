@@ -46,10 +46,7 @@ if (!isset($_SESSION['id']) || !isset($_SESSION['roomId'])) {
 
     // Load code and chat on page load
     window.onload = function () {
-      fetch('load_code.php')
-        .then(res => res.text())
-        .then(data => editor.value = data);
-
+      
       fetch('load_chat.php')
         .then(res => res.json())
         .then(messages => {

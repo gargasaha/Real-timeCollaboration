@@ -7,6 +7,7 @@ if (!isset($_SESSION['id'])) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Dashboard - Real-time Collaboration</title>
@@ -18,6 +19,7 @@ if (!isset($_SESSION['id'])) {
             background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
             min-height: 100vh;
         }
+
         .dashboard-container {
             max-width: 850px;
             margin: 48px auto;
@@ -27,12 +29,14 @@ if (!isset($_SESSION['id'])) {
             padding: 48px 36px 36px 36px;
             border: 2px solid #e0c3fc;
         }
+
         .welcome {
             font-weight: 800;
             color: #6a11cb;
             letter-spacing: 1px;
             font-size: 2rem;
         }
+
         .room-title {
             color: #2575fc;
             font-weight: 700;
@@ -41,28 +45,33 @@ if (!isset($_SESSION['id'])) {
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+
         .btn-custom {
             min-width: 220px;
             font-size: 1.15rem;
             margin-bottom: 18px;
             font-weight: 600;
             border-radius: 30px;
-            box-shadow: 0 4px 16px rgba(106,17,203,0.10);
+            box-shadow: 0 4px 16px rgba(106, 17, 203, 0.10);
             transition: transform 0.12s, box-shadow 0.12s;
         }
+
         .btn-primary.btn-custom {
             background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
             border: none;
         }
+
         .btn-success.btn-custom {
             background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
             border: none;
             color: #222;
         }
+
         .btn-custom:hover {
             transform: translateY(-2px) scale(1.03);
             box-shadow: 0 8px 24px rgba(80, 60, 120, 0.18);
         }
+
         .iframe-container {
             border-radius: 16px;
             overflow: hidden;
@@ -71,29 +80,58 @@ if (!isset($_SESSION['id'])) {
             border: 2px solid #a18cd1;
             background: #f8fafc;
         }
+
         .btn-outline-danger {
             border-radius: 20px;
             font-weight: 600;
             border-width: 2px;
         }
+
         @media (max-width: 600px) {
             .dashboard-container {
                 padding: 20px 8px;
             }
+
             .welcome {
                 font-size: 1.2rem;
             }
         }
     </style>
 </head>
+
 <body>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Navbar</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Features</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Pricing</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
     <div class="dashboard-container shadow-lg">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="welcome mb-0">Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h2>
             <a href="logout.php" class="btn btn-outline-danger btn-sm">Logout</a>
         </div>
         <?php
-        $sql="select * from room_member where user_id='{$_SESSION['id']}'";
+        $sql = "select * from room_member where user_id='{$_SESSION['id']}'";
         $mysqli = mysqli_connect("localhost", "root", "9932", "devcollab");
         if (!$mysqli) {
             die('<div class="alert alert-danger">Connection failed: ' . mysqli_connect_error() . '</div>');
@@ -105,14 +143,14 @@ if (!isset($_SESSION['id'])) {
         $row = mysqli_fetch_assoc($result);
         mysqli_free_result($result);
         mysqli_close($mysqli);
-        if (!isset( $row['room_id'])) {
-        ?>
-            
+        if (!isset($row['room_id'])) {
+            ?>
+
             <div class="text-center mt-5">
                 <a href="create_room.php" class="btn btn-primary btn-lg btn-custom me-3 shadow">Create a New Room</a>
                 <a href="join_room.php" class="btn btn-success btn-lg btn-custom shadow">Join an Existing Room</a>
             </div>
-        <?php
+            <?php
         } else {
             $_SESSION["roomId"] = $row['room_id'];
             $mysqli = mysqli_connect("localhost", "root", "9932", "devcollab");
@@ -131,32 +169,24 @@ if (!isset($_SESSION['id'])) {
             echo '</div>';
             mysqli_free_result($result);
             mysqli_close($mysqli);
-        ?>
+            ?>
             <div class="iframe-container position-relative" style="overflow:hidden;">
-                <iframe 
-                    src="index.php" 
-                    style="width:100%; height:70vh; border:none; background: #f8fafc; overflow:hidden;" 
-                    allowfullscreen 
-                    loading="lazy"
-                    title="Collaboration Room"
-                    id="collab-iframe"
-                    scrolling="no"
-                ></iframe>
-                <button 
-                    type="button" 
-                    class="btn btn-light position-absolute top-0 end-0 m-2 shadow-sm" 
-                    onclick="document.getElementById('collab-iframe').requestFullscreen();"
-                    title="Fullscreen"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-arrows-fullscreen" viewBox="0 0 16 16">
-                        <path fill-rule="evenodd" d="M1 1v5h1V2.707l4.146 4.147.708-.708L2.707 2H6V1H1zm14 0h-5v1h3.293l-4.147 4.146.708.708L13.293 2H10V1h5zm-1 14v-5h-1v3.293l-4.146-4.147-.708.708L13.293 14H10v1h5zm-14 0h5v-1H2.707l4.147-4.146-.708-.708L2 13.293V10H1v5z"/>
+                <iframe src="index.php" style="width:100%; height:70vh; border:none; background: #f8fafc; overflow:hidden;"
+                    allowfullscreen loading="lazy" title="Collaboration Room" id="collab-iframe" scrolling="no"></iframe>
+                <button type="button" class="btn btn-light position-absolute top-0 end-0 m-2 shadow-sm"
+                    onclick="document.getElementById('collab-iframe').requestFullscreen();" title="Fullscreen">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+                        class="bi bi-arrows-fullscreen" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M1 1v5h1V2.707l4.146 4.147.708-.708L2.707 2H6V1H1zm14 0h-5v1h3.293l-4.147 4.146.708.708L13.293 2H10V1h5zm-1 14v-5h-1v3.293l-4.146-4.147-.708.708L13.293 14H10v1h5zm-14 0h5v-1H2.707l4.147-4.146-.708-.708L2 13.293V10H1v5z" />
                     </svg>
                 </button>
             </div>
-        <?php
+            <?php
         }
         ?>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
