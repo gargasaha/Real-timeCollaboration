@@ -7,9 +7,14 @@ if ($mysqli->connect_error) {
 }
 
 if (isset($_SESSION['roomId']))
-    if ($row = $result->fetch_assoc()) {
-        echo $row['codes'];
-    }
+    $sql = "select codes from code_bases where room_id = {$_SESSION['roomId']}";
+$result = $mysqli->query($sql);
+if (!$result) {
+    die("Error fetching code base: {$mysqli->error}");
+}
+if ($row = $result->fetch_assoc()) {
+    echo $row['codes'];
+}
 
 $mysqli->close();
 ?>

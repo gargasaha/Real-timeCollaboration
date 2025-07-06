@@ -12,11 +12,25 @@ if (!isset($_SESSION['id'])) {
     <meta charset="UTF-8">
     <title>Dashboard - Real-time Collaboration</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap 5 CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        html,
         body {
-            background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+            overflow-x: hidden;
+            overflow-y: scroll;
+            height: 100%;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar {
+            display: none;
+        }
+
+        body {
+            background: linear-gradient(135deg, #232526 0%, #414345 100%);
+            color: #f3f3f3;
             min-height: 100vh;
         }
 
@@ -28,6 +42,7 @@ if (!isset($_SESSION['id'])) {
             box-shadow: 0 10px 40px rgba(80, 60, 120, 0.18);
             padding: 48px 36px 36px 36px;
             border: 2px solid #e0c3fc;
+            width: 98vw;
         }
 
         .welcome {
@@ -79,6 +94,28 @@ if (!isset($_SESSION['id'])) {
             margin-top: 28px;
             border: 2px solid #a18cd1;
             background: #f8fafc;
+            display: flex;
+            flex-direction: row;
+            gap: 24px;
+            padding: 16px;
+        }
+
+        .code-editor-section,
+        .compile-section,
+        .result-section,
+        .chat-section {
+            flex: 1 1 0;
+            min-width: 0;
+        }
+
+        .chat-section {
+            max-width: 320px;
+            min-width: 220px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(80, 60, 120, 0.08);
+            padding: 12px;
+            margin-left: auto;
         }
 
         .btn-outline-danger {
@@ -87,22 +124,76 @@ if (!isset($_SESSION['id'])) {
             border-width: 2px;
         }
 
+        @media (max-width: 900px) {
+            .dashboard-container {
+                max-width: 98vw;
+                padding: 32px 12px 24px 12px;
+            }
+
+            .iframe-container {
+                flex-direction: column;
+                gap: 16px;
+                padding: 8px;
+            }
+
+            .chat-section {
+                max-width: 100%;
+                min-width: 0;
+                margin-left: 0;
+            }
+
+            .iframe-container iframe {
+                height: 50vh;
+            }
+        }
+
         @media (max-width: 600px) {
             .dashboard-container {
-                padding: 20px 8px;
+                padding: 16px 2vw;
+                margin: 16px auto;
             }
 
             .welcome {
                 font-size: 1.2rem;
             }
+
+            .room-title {
+                font-size: 1.1rem;
+            }
+
+            .btn-custom {
+                min-width: 120px;
+                font-size: 1rem;
+                padding: 8px 12px;
+            }
+
+            .iframe-container iframe {
+                height: 38vh;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .dashboard-container {
+                padding: 8px 1vw;
+            }
+
+            .btn-custom {
+                min-width: 90px;
+                font-size: 0.95rem;
+            }
+
+            .iframe-container iframe {
+                height: 30vh;
+            }
         }
     </style>
+
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <nav class="navbar navbar-expand-lg" style="background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Navbar</a>
+            <a class="navbar-brand" href="default.php">devCollab</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -113,23 +204,27 @@ if (!isset($_SESSION['id'])) {
                         <a class="nav-link active" aria-current="page" href="#">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Features</a>
+                        <a class="nav-link" href="/Real-timeCollaboration/login.php">Sign <Inp></Inp></a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Pricing</a>
+                        <a class="nav-link" href="/Real-timeCollaboration/register.php">Sign Up</a>
                     </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+                        <span class="welcome mb-0 text-end d-inline-block align-middle"
+                            style="min-width:200px; line-height: 1.8;">
+                            Welcome, <span
+                                class="fw-bold text-primary"><?php echo htmlspecialchars($_SESSION['username']); ?></span>!
+                        </span>
+                        <a href="logout.php" class="btn btn-outline-danger btn-sm ms-2 align-middle my-2">Logout</a>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
-    <div class="dashboard-container shadow-lg">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="welcome mb-0">Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h2>
-            <a href="logout.php" class="btn btn-outline-danger btn-sm">Logout</a>
-        </div>
+    <div class="dashboard-container shadow-lg" style="max-width:98vw; width:98vw;">
+
         <?php
         $sql = "select * from room_member where user_id='{$_SESSION['id']}'";
         $mysqli = mysqli_connect("localhost", "root", "9932", "devcollab");
@@ -171,8 +266,9 @@ if (!isset($_SESSION['id'])) {
             mysqli_close($mysqli);
             ?>
             <div class="iframe-container position-relative" style="overflow:hidden;">
-                <iframe src="index.php" style="width:100%; height:70vh; border:none; background: #f8fafc; overflow:hidden;"
-                    allowfullscreen loading="lazy" title="Collaboration Room" id="collab-iframe" scrolling="no"></iframe>
+                <iframe src="index.php"
+                    style="width:100vw; max-width:100%; height:70vh; border:none; background: #f8fafc; overflow:auto;"
+                    allowfullscreen loading="lazy" title="Collaboration Room" id="collab-iframe" scrolling="yes"></iframe>
                 <button type="button" class="btn btn-light position-absolute top-0 end-0 m-2 shadow-sm"
                     onclick="document.getElementById('collab-iframe').requestFullscreen();" title="Fullscreen">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"

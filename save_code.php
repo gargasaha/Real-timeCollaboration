@@ -15,7 +15,7 @@ if (!$result) {
 $row = $result->fetch_assoc();
 
 
-$code =$row['codes']. $_POST['code'] ?? '';
+$code = $_POST['code'] ?? '';
 $roomId = $_SESSION['roomId'] ?? null;
 
 if ($roomId === null) {
