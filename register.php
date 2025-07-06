@@ -1,4 +1,47 @@
 <!-- ... PHP code stays the same ... -->
+<?php
+session_start();
+if (isset($_SESSION["id"]) && $_SESSION["id"]) {
+  header("Location: dashboard.php");
+  exit();
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $mysqli = new mysqli("localhost", "root", "9932", "devcollab");
+  if ($mysqli->connect_error) {
+    die("Connection failed: " . $mysqli->connect_error);
+  }
+  $username = $mysqli->real_escape_string($_POST['username']);
+  $email = $mysqli->real_escape_string($_POST['email']);
+  $password = $_POST['password'];
+  $query = $mysqli->query('SELECT COUNT(*) as count FROM users WHERE username = "' . $username . '" OR email = "' . $email . '"');
+  if ($query && $query->num_rows > 0) {
+    $row = $query->fetch_assoc();
+    if ($row['count'] > 0) {
+      $feedback = "Username or email already exists.";
+    } else {
+      $stmt = $mysqli->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
+      if ($stmt) {
+        $stmt->bind_param("sss", $username, $email, $password);
+        if ($stmt->execute()) {
+          $_SESSION['id'] = $mysqli->insert_id;
+          $_SESSION['username'] = $username;
+          header("Location: dashboard.php");
+          exit();
+        } else {
+          $feedback = "Error creating account: " . $stmt->error;
+        }
+        $stmt->close();
+      } else {
+        $feedback = "Error preparing statement: " . $mysqli->error;
+      }
+    }
+  } else {
+    $feedback = "Error checking existing users: " . $mysqli->error;
+  }
+  $mysqli->close();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -172,15 +215,15 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
-            <li class="nav-item">
+          <li class="nav-item">
             <a class="nav-link" href="/Real-timeCollaboration/">Home</a>
-            </li>
-            <li class="nav-item">
+          </li>
+          <li class="nav-item">
             <a class="nav-link" href="/Real-timeCollaboration/login.php">Sign In</a>
-            </li>
-            <li class="nav-item">
+          </li>
+          <li class="nav-item">
             <a class="nav-link" href="/Real-timeCollaboration/register.php">Sign Up</a>
-            </li>
+          </li>
         </ul>
       </div>
     </div>
@@ -196,7 +239,7 @@
           <?php if ($feedback): ?>
             <div class="feedback"><?= htmlspecialchars($feedback) ?></div>
           <?php endif; ?>
-          <form method="post" autocomplete="off">
+          <form method="post" action="register.php" autocomplete="off">
             <div class="mb-3">
               <label for="username" class="form-label">Username</label>
               <input type="text" class="form-control" id="username" name="username" required autofocus>
