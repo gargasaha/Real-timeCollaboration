@@ -1,4 +1,3 @@
-<!-- ... PHP code stays the same ... -->
 <?php
 session_start();
 if (isset($_SESSION["id"]) && $_SESSION["id"]) {
@@ -49,10 +48,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta charset="UTF-8">
   <title>Register - DevCollab</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  
   <style>
     body {
       min-height: 100vh;
@@ -247,13 +245,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="mb-3">
               <label for="email" class="form-label">Email address</label>
               <input type="email" class="form-control" id="email" name="email" required>
+              <button type="button" class="btn btn-warning" id="verifyEmailBtn" onclick="verifyEmail()">Verify
+                Email</button>
             </div>
             <div class="mb-3">
               <label for="password" class="form-label">Password</label>
               <input type="password" class="form-control" id="password" name="password" required>
             </div>
             <div class="d-grid">
-              <button type="submit" class="btn btn-primary btn-lg">Register</button>
+              <button type="submit" class="btn btn-primary btn-lg" onclick="return f===1;">Register</button>
             </div>
           </form>
           <div class="text-center mt-3">
@@ -263,7 +263,78 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
     </div>
   </div>
-  <!-- Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <script>
+    var f=0;
+    function verifyEmail() {
+      const btn = document.getElementById('verifyEmailBtn');
+      btn.disabled = true;
+      btn.innerText = "Sending email...";
+      btn.insertAdjacentHTML('beforeend', ' <span class="spinner-border spinner-border-sm text-success ms-2" role="status" aria-hidden="true"></span>');
+      const alertDiv = document.createElement('div');
+      alertDiv.className = 'alert alert-success mt-2';
+      alertDiv.role = 'alert';
+      const email = document.getElementById('email').value;
+      const username = document.getElementById('username').value;
+      if (!email) {
+        alert('Please enter your email address first.');
+        btn.disabled = false;
+        btn.innerText = "Verify Email";
+        return;
+      }
+      $.ajax({
+        url: 'send_email_verification.php',
+        type: 'POST',
+        dataType: 'json',
+        data: { email: email, username: username },
+        success: function (response) {
+          if(response.error) {
+            alertDiv.innerText = response.error;
+            document.getElementById('email').parentNode.insertBefore(alertDiv, document.getElementById('email').nextSibling);
+            btn.disabled = false;
+            btn.innerText = "Verify Email";
+            email.innerText = "";
+            console.error('Error sending verification email:', response.error);
+            console.log('Response:', response);
+            return;
+          }
+          const prevAlert = document.querySelector('.alert-success');
+          if (prevAlert) prevAlert.remove();
+          alertDiv.innerText = 'A verification email has been sent to ' + email + '. Please check your inbox.';
+          const emailInput = document.getElementById('email');
+          emailInput.parentNode.insertBefore(alertDiv, emailInput.nextSibling);
+          btn.innerText = "Verifying";
+          btn.insertAdjacentHTML('beforeend', ' <span class="spinner-border spinner-border-sm text-light ms-2" role="status" aria-hidden="true"></span>');
+          console.log('Verification code sent:', response);
+          let intervalId = setInterval(() => {
+            $.ajax({
+              url: 'verify_from_client.php',
+              type: 'POST',
+              data: { email: email, vid: response.verificationCode },
+              success: function (data) {
+                if (data === "verified") {
+                  alertDiv.innerText = 'Email verified successfully!';
+                  btn.innerText = "Verified";
+                  btn.disabled = true;
+                  f=1;
+                  clearInterval(intervalId);
+                }
+              },
+              error: function () {
+                alertDiv.innerText = 'Error checking verification status.';
+              }
+            });
+          }, 1000);
+        },
+        error: function (xhr, status, error) {
+          alert('Error sending verification email: ' + xhr.responseText);
+          btn.disabled = false;
+          btn.innerText = "Verify Email";
+        }
+      });
+    }
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
