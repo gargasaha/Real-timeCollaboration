@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Jul 06, 2025 at 10:30 PM
+-- Generation Time: Jul 09, 2025 at 09:31 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -69,6 +69,13 @@ CREATE TABLE `users` (
   `password` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `username`, `email`, `password`) VALUES
+(19, 'garga', 'sahagarga000@gmail.com', '9932');
+
 -- --------------------------------------------------------
 
 --
@@ -82,6 +89,25 @@ CREATE TABLE `user_messages` (
   `message` varchar(100) NOT NULL,
   `tm` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `verification`
+--
+
+CREATE TABLE `verification` (
+  `vid` int(11) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `isVerified` int(11) DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `verification`
+--
+
+INSERT INTO `verification` (`vid`, `email`, `isVerified`) VALUES
+(531036, 'sahagarga000@gmail.com', 1);
 
 --
 -- Indexes for dumped tables
@@ -115,6 +141,12 @@ ALTER TABLE `users`
   ADD UNIQUE KEY `username` (`username`);
 
 --
+-- Indexes for table `verification`
+--
+ALTER TABLE `verification`
+  ADD PRIMARY KEY (`vid`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -122,19 +154,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `code_bases`
 --
 ALTER TABLE `code_bases`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `room`
 --
 ALTER TABLE `room`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- Constraints for dumped tables
