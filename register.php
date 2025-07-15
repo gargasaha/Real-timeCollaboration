@@ -5,40 +5,38 @@ if (isset($_SESSION["id"]) && $_SESSION["id"]) {
   exit();
 }
 
+require_once "dbconnect.php";
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $mysqli = new mysqli("localhost", "root", "9932", "devcollab");
-  if ($mysqli->connect_error) {
-    die("Connection failed: " . $mysqli->connect_error);
-  }
-  $username = $mysqli->real_escape_string($_POST['username']);
-  $email = $mysqli->real_escape_string($_POST['email']);
+  $username = mysqli_real_escape_string($conn, $_POST['username']);
+  $email = mysqli_real_escape_string($conn, $_POST['email']);
   $password = $_POST['password'];
-  $query = $mysqli->query('SELECT COUNT(*) as count FROM users WHERE username = "' . $username . '" OR email = "' . $email . '"');
-  if ($query && $query->num_rows > 0) {
-    $row = $query->fetch_assoc();
+  $query = mysqli_query($conn, 'SELECT COUNT(*) as count FROM users WHERE username = "' . $username . '" OR email = "' . $email . '"');
+  if ($query && mysqli_num_rows($query) > 0) {
+    $row = mysqli_fetch_assoc($query);
     if ($row['count'] > 0) {
       $feedback = "Username or email already exists.";
     } else {
-      $stmt = $mysqli->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
+      $stmt = mysqli_prepare($conn, "INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
       if ($stmt) {
-        $stmt->bind_param("sss", $username, $email, $password);
-        if ($stmt->execute()) {
-          $_SESSION['id'] = $mysqli->insert_id;
+        mysqli_stmt_bind_param($stmt, "sss", $username, $email, $password);
+        if (mysqli_stmt_execute($stmt)) {
+          $_SESSION['id'] = mysqli_insert_id($conn);
           $_SESSION['username'] = $username;
           header("Location: dashboard.php");
           exit();
         } else {
-          $feedback = "Error creating account: " . $stmt->error;
+          $feedback = "Error creating account: " . mysqli_stmt_error($stmt);
         }
-        $stmt->close();
+        mysqli_stmt_close($stmt);
       } else {
-        $feedback = "Error preparing statement: " . $mysqli->error;
+        $feedback = "Error preparing statement: " . mysqli_error($conn);
       }
     }
   } else {
-    $feedback = "Error checking existing users: " . $mysqli->error;
+    $feedback = "Error checking existing users: " . mysqli_error($conn);
   }
-  $mysqli->close();
+  mysqli_close($conn);
 }
 ?>
 <!DOCTYPE html>

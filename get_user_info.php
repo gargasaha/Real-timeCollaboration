@@ -5,9 +5,10 @@ error_reporting(E_ALL);
 
 header('Content-Type: application/json');
 
+require_once 'dbconnect.php';
+
 if (isset($_GET['user_id']) && is_numeric($_GET['user_id'])) {
     $userId = intval($_GET['user_id']);
-    $conn = mysqli_connect('localhost', 'root', '9932', 'devcollab');
     if (!$conn) {
         echo json_encode(['error' => 'Database connection failed']);
         exit;

@@ -1,26 +1,23 @@
 <?php
+    require_once 'dbconnect.php';
     if($_SERVER['REQUEST_METHOD'] === 'POST'){
         session_start();
         $room_name = $_POST['room_name'];
         $password = $_POST['password'];
 
-        $mysqli = mysqli_connect("localhost", "root", "9932", "devcollab");
-        if (!$mysqli) {
-            die("Connection failed: " . mysqli_connect_error());
-        }
         $sql = "SELECT id FROM room WHERE room_name=? AND room_password=?";
-        $stmt = $mysqli->prepare($sql);
+        $stmt = $conn->prepare($sql);
         $stmt->bind_param("ss", $room_name, $password);
         $stmt->execute();
         $result = $stmt->get_result();
         if (!$result) {
-            die("Query failed: " . mysqli_error($mysqli));
+            die("Query failed: " . mysqli_error($conn));
         }
         $row = $result->fetch_assoc();
         if ($row) {
             $room_id = $row["id"];
             $sql="SELECT COUNT(*) FROM room_member WHERE room_id=? AND user_id=?";
-            $stmt2 = $mysqli->prepare($sql);
+            $stmt2 = $conn->prepare($sql);
             $stmt2->bind_param("ii", $room_id, $_SESSION['id']);
             $stmt2->execute();
             $result2 = $stmt2->get_result();
@@ -30,7 +27,7 @@
             }
             else{
                 $sql="INSERT INTO room_member (room_id, user_id) VALUES (?, ?)";
-                $stmt3 = $mysqli->prepare($sql);
+                $stmt3 = $conn->prepare($sql);
                 $stmt3->bind_param("ii", $room_id, $_SESSION['id']);
                 if (!$stmt3->execute()) {
                     $alert = "Error joining room: " . $stmt3->error;
@@ -44,7 +41,7 @@
             $alert = "Room not found or incorrect password.";
         }
         $stmt->close();
-        $mysqli->close();
+        $conn->close();
     }
 ?>
 <!DOCTYPE html>

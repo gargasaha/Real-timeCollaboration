@@ -2,14 +2,13 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 session_start();
-$conn = mysqli_connect('localhost', 'root', '9932', 'devcollab');
+require_once 'dbconnect.php'; // Use your dbconnect.php for connection
+
 if (mysqli_connect_errno()) {
     die('Connection failed: ' . mysqli_connect_error());
 }
-$sql = 'SELECT * FROM user_messages WHERE roomId=' . intval($_SESSION['roomId']) . ' ORDER BY tm ASC';
-$result = $conn->query($sql);
-if ($result) {
-    echo '<style>
+
+echo '<style>
 .chat-message {
     width: 100%;
     margin: 10px 0;
@@ -53,6 +52,9 @@ if ($result) {
 }
 </style>';
 
+$sql = 'SELECT * FROM user_messages WHERE roomId=' . intval($_SESSION['roomId']) . ' ORDER BY tm ASC';
+$result = $conn->query($sql);
+if ($result) {
     while ($row = $result->fetch_assoc()) {
         $isMe = ($row['fromId'] == $_SESSION['id']);
         $isToAll = (intval($row['toId']) === 0);

@@ -5,8 +5,9 @@ if (!isset($_SESSION['id']) || !isset($_SESSION['roomId'])) {
     exit;
 }
 
-$mysqli = new mysqli("localhost", "root", "9932", "devcollab");
-if ($mysqli->connect_errno) {
+include 'dbconnect.php'; // Use your dbconnect.php for connection
+
+if (!$conn) {
     echo json_encode([]);
     exit;
 }
@@ -17,7 +18,7 @@ $sql = "SELECT users.id, users.username
         JOIN room_member ON users.id = room_member.user_id 
         WHERE room_member.room_id = $roomId";
 
-$result = $mysqli->query($sql);
+$result = $conn->query($sql);
 $members = [];
 
 if ($result) {
@@ -27,5 +28,5 @@ if ($result) {
     $result->free();
 }
 
-$mysqli->close();
+$conn->close();
 echo json_encode($members);

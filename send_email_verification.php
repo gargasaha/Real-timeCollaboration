@@ -5,10 +5,10 @@ use PHPMailer\PHPMailer\Exception;
 // Only proceed if the request is POST and email is set
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'], $_POST['username'])) {
     require __DIR__ . '/vendor/autoload.php';
+    require __DIR__ . '/dbconnect.php'; // Use your dbconnect.php
 
     $mail = new PHPMailer(true);
 
-    $conn = mysqli_connect("localhost", "root", "9932", "devcollab");
     if (!$conn) {
         die("Connection failed: " . mysqli_connect_error());
     }   
@@ -67,14 +67,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'], $_POST['user
         ";
 
         $mail->send();
-        $conn=mysqli_connect("localhost", "root", "9932", "devcollab");
-        if (!$conn) {
-            die("Connection failed: " . mysqli_connect_error());
-        }
+
+        // Remove previous verification code
         $sql="delete from verification where email=?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("s", $_POST['email']);
-        $stmt->execute();
         if (!$stmt->execute()) {
             echo "❗ Error deleting previous verification code: " . $stmt->error;
         } else {

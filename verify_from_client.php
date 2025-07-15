@@ -2,7 +2,7 @@
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $vid = $_POST['vid'] ?? '';
     $email = $_POST['email'] ?? '';
-    $conn = mysqli_connect("localhost", "root", "9932", "devcollab");
+    include 'dbconnect.php'; // Use your dbconnect.php for connection
     if (!$conn) {
         die("Connection failed: " . mysqli_connect_error());
     }

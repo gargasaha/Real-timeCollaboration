@@ -1,19 +1,15 @@
 <?php
+    require_once 'dbconnect.php';
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         session_start();
         $room_name = $_POST['room_name'];
         $password = $_POST['password'];
 
-        $mysqli = mysqli_connect("localhost", "root", "9932", "devcollab");
-        if (!$mysqli) {
-            die("Connection failed: " . mysqli_connect_error());
-        }
-
-        $query = "SELECT count(*) as count FROM room WHERE room_name = '" . mysqli_real_escape_string($mysqli, $room_name) . "'";
-        $result = mysqli_query($mysqli, $query);
+        $query = "SELECT count(*) as count FROM room WHERE room_name = '" . mysqli_real_escape_string($conn, $room_name) . "'";
+        $result = mysqli_query($conn, $query);
         if (!$result) {
-            die("Query failed: " . mysqli_error($mysqli));
+            die("Query failed: " . mysqli_error($conn));
         }
         $row = mysqli_fetch_assoc($result);
         $count = $row['count'];
@@ -22,32 +18,32 @@
         if (isset($count) && $count > 0) {
             echo "<script>alert('Room already exists');</script>";
         } else {
-            $stmt = mysqli_prepare($mysqli, "INSERT INTO room (room_name, room_password) VALUES (?, ?)");
+            $stmt = mysqli_prepare($conn, "INSERT INTO room (room_name, room_password) VALUES (?, ?)");
             if (!$stmt) {
-                die("Prepare failed: " . mysqli_error($mysqli));
+                die("Prepare failed: " . mysqli_error($conn));
             }
             mysqli_stmt_bind_param($stmt, "ss", $room_name, $password);
             if (mysqli_stmt_execute($stmt)) {
-                $sql="select id from room where room_name='$room_name' and room_password='$password'";
-                $result = mysqli_query($mysqli, $sql);
+                $sql = "SELECT id FROM room WHERE room_name='$room_name' AND room_password='$password'";
+                $result = mysqli_query($conn, $sql);
                 if (!$result) {
-                    die("Query failed: " . mysqli_error($mysqli));
-                }   
+                    die("Query failed: " . mysqli_error($conn));
+                }
                 $row = mysqli_fetch_assoc($result);
                 mysqli_free_result($result);
                 $_SESSION['roomId'] = $row['id'];
                 mysqli_stmt_close($stmt);
-                $sql="insert into room_member (room_id, user_id) values ('{$row['id']}', '{$_SESSION['id']}')";
-                if (!mysqli_query($mysqli, $sql)) {
-                    echo "<script>alert('Error adding member to room: " . mysqli_error($mysqli) . "');</script>";
+                $sql = "INSERT INTO room_member (room_id, user_id) VALUES ('{$row['id']}', '{$_SESSION['id']}')";
+                if (!mysqli_query($conn, $sql)) {
+                    echo "<script>alert('Error adding member to room: " . mysqli_error($conn) . "');</script>";
                 }
 
-                $sql="insert into code_bases (codes,room_id) values ('', {$_SESSION['roomId']})";
-                if (!mysqli_query($mysqli, $sql)) {
-                    echo "<script>alert('Error creating code base: " . mysqli_error($mysqli) . "');</script>";
+                $sql = "INSERT INTO code_bases (codes, room_id) VALUES ('', {$_SESSION['roomId']})";
+                if (!mysqli_query($conn, $sql)) {
+                    echo "<script>alert('Error creating code base: " . mysqli_error($conn) . "');</script>";
                 }
 
-                mysqli_close($mysqli);
+                mysqli_close($conn);
                 header("Location: dashboard.php");
                 exit();
             } else {
@@ -55,7 +51,7 @@
             }
             mysqli_stmt_close($stmt);
         }
-        mysqli_close($mysqli);
+        mysqli_close($conn);
     }
 ?>
 

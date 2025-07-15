@@ -1,25 +1,28 @@
 <?php
 session_start();
+require_once 'dbconnect.php';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username']);
     $password = trim($_POST['password']);
-    $conn = mysqli_connect("localhost", "root", "9932", "devcollab");
-    if (!$conn) {
-        die("Connection failed: " . mysqli_connect_error());
+
+    // Use prepared statements to prevent SQL injection
+    $stmt = mysqli_prepare($conn, "SELECT * FROM users WHERE username = ? AND password = ?");
+    mysqli_stmt_bind_param($stmt, "ss", $username, $password);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    if ($result && mysqli_num_rows($result) > 0) {
+        $row = mysqli_fetch_assoc($result);
+        $_SESSION['id'] = $row['id'];
+        $_SESSION['username'] = $row['username'];
+        header("Location: dashboard.php");
+        exit;
     } else {
-        $command = "select * from users where username='$username' and password='$password'";
-        $result = mysqli_query($conn, $command) or die(mysqli_error($conn));
-        if (mysqli_num_rows($result) > 0) {
-            $row = mysqli_fetch_assoc($result);
-            $_SESSION['id'] = $row['id'];
-            $_SESSION['username'] = $row['username'];
-            header("Location: dashboard.php");
-            exit;
-        } else {
-            $error = "Invalid username or password.";
-            mysqli_free_result($result);
-        }
+        $error = "Invalid username or password.";
     }
+
+    mysqli_stmt_close($stmt);
 }
 ?>
 <!DOCTYPE html>

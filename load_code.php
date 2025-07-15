@@ -1,20 +1,18 @@
 <?php
 session_start();
+include 'dbconnect.php'; // Use your dbconnect.php for connection
 
-$mysqli = new mysqli("localhost", "root", "9932", "devcollab");
-if ($mysqli->connect_error) {
-    die("Connection failed: {$mysqli->connect_error}");
+if (isset($_SESSION['roomId'])) {
+    $roomId = intval($_SESSION['roomId']); // Prevent SQL injection
+    $sql = "SELECT codes FROM code_bases WHERE room_id = $roomId";
+    $result = mysqli_query($conn, $sql);
+    if (!$result) {
+        die("Error fetching code base: " . mysqli_error($conn));
+    }
+    if ($row = mysqli_fetch_assoc($result)) {
+        echo $row['codes'];
+    }
 }
 
-if (isset($_SESSION['roomId']))
-    $sql = "select codes from code_bases where room_id = {$_SESSION['roomId']}";
-$result = $mysqli->query($sql);
-if (!$result) {
-    die("Error fetching code base: {$mysqli->error}");
-}
-if ($row = $result->fetch_assoc()) {
-    echo $row['codes'];
-}
-
-$mysqli->close();
+mysqli_close($conn);
 ?>

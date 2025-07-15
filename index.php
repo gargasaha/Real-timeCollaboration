@@ -422,7 +422,7 @@ if (!isset($_SESSION['id']) || !isset($_SESSION['roomId'])) {
               '&toId=' + encodeURIComponent(targetId) +
               '&roomId=' + encodeURIComponent(roomId)
           });
-          console.log(msgText, userId, targetId, roomId);
+          // console.log(msgText, userId, targetId, roomId);
         }
       }
     });
