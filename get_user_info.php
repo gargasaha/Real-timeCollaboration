@@ -24,3 +24,4 @@ if (isset($_GET['user_id']) && is_numeric($_GET['user_id'])) {
 } else {
     echo json_encode(['error' => 'Invalid or missing user_id']);
 }
+
